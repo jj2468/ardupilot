@@ -1,0 +1,58 @@
+# hw definition file for processing by chibios_pins.py
+
+# MCU class and specific type
+MCU STM32G4xx STM32G474xx
+
+FLASH_RESERVE_START_KB 0
+FLASH_BOOTLOADER_LOAD_KB 32
+
+# reserve some space for params
+APP_START_OFFSET_KB 4
+
+# assume 512k flash part
+FLASH_SIZE_KB 512
+
+# board ID for firmware load
+APJ_BOARD_ID 1053
+
+# setup build for a peripheral firmware
+env AP_PERIPH 1
+
+# crystal frequency
+OSCILLATOR_HZ 24000000
+
+define CH_CFG_ST_FREQUENCY 1000000
+
+# order of UARTs
+SERIAL_ORDER USART3
+
+# USART3
+PB10 USART3_TX USART3
+PB11 USART3_RX USART3
+
+# SWD debugging
+PA13 JTMS-SWDIO SWD
+PA14 JTCK-SWCLK SWD
+
+PB0 LED_BOOTLOADER OUTPUT HIGH
+define HAL_LED_ON 0
+
+define HAL_USE_SERIAL TRUE
+
+define STM32_SERIAL_USE_USART3 TRUE
+
+#define HAL_NO_GPIO_IRQ
+define HAL_USE_EMPTY_IO TRUE
+
+# avoid timer threads to save memory
+define HAL_NO_TIMER_THREAD
+
+define DMA_RESERVE_SIZE 0
+
+PB6 BMI088_G_CS CS
+PB7 BMI088_A_CS CS
+
+# enable CAN support
+PB12 CAN2_RX CAN2
+PB13 CAN2_TX CAN2
+PB14 GPIO_CAN2_SILENT OUTPUT PUSHPULL SPEED_LOW LOW

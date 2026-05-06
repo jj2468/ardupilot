@@ -1,0 +1,401 @@
+# chibios_hwdef.py로 처리할 hw 정의 파일
+# FMUv3 하드웨어용(예: Pixhawk1, Pixhawk2 큐브, XUAV2.1 등).
+
+# 이 hwdef.dat 파일에는 많은 주석이 포함되어 있어, # 새로운 보드를 추가하는 개발자를 위한
+# 개발자가 새 보드를 추가할 때 참고할 수 있습니다.
+
+# hwdef.dat 파일은 다음과 같은 모든 하드웨어 주변 장치와 핀을 정의합니다.
+# 모든 하드웨어 주변 장치와 핀을 정의합니다. 파일은 다음과 같아야 합니다.
+# 새 보드에 대한 hwdef.dat 파일을 작성할 수 있어야 합니다.
+# 보드의 회로도만 있으면 됩니다.
+
+# 이 파일은 chibios_hwdef.py에 의해 처리되어 #이 보드에 대한 hwdef.h를 생성합니다.
+# 이 보드에 대한 새 보드를 빌드할 때 다음과 같이 수동으로 chibios_hwdef.py를 실행하는 것이 유용할 수 있습니다.
+# 파일을 수동으로 실행하는 것이 유용할 수 있습니다. 생성된 hwdef.h 파일은 읽기 쉽도록 형식이 지정됩니다. 강력히 권장합니다.
+# 새 보드로 포팅할 때 결과 hwdef.h 파일을 읽어볼 것을 강력히 권장합니다.
+# 원하는 결과를 얻었는지 확인하는 것이 좋습니다.
+
+# 이 파일을 해당 보드의 회로도와 함께 읽어야 합니다.
+# 보드의 회로도, 보드용 MCU의 데이터시트 및 추출한 파이썬의
+# 데이터시트에서 추출한 파이썬 # 테이블 파일과 함께 읽어야 합니다.
+# MCU. 파이썬 테이블 파일은 특히 중요하므로 다음과 같은 경우
+# 전에 본 적이 없다면 지금 바로 확인하세요. STM32F427의 경우
+# STM32F427xx.py라고 하며 hwdef/script/ 디렉터리에 있습니다.
+# HAL_ChibiOS 디렉터리 안에 있습니다. 이 파일은 각 핀이 # 무엇을 할 수 있는지 알려줍니다.
+# (대체 기능 표) 및 각 주변 장치에 사용할 수 있는 DMA 채널을
+# 각 주변 장치 유형에 사용할 수 있는 DMA 채널을 알려줍니다. 대체 함수 테이블은 다음과 같습니다.
+# 특히 새로운 hwdef.dat 파일로 작업할 때 유용합니다.
+# 포트/핀 이름이 주어진 주변 장치 번호를 출력할 수 있기 때문입니다.
+
+# 먼저 보드에 어떤 메인 CPU가 있는지부터 알아야 합니다. 여기에는 지정해야 하는 두 개의 CPU 식별자가 있습니다.
+# 첫 번째는 ChibiOS MCU 유형입니다. 현재로서는 모든 STM32F4 보드 유형만 지원합니다. 향후에는 F7 및 기타 MCU 유형을 추가할 예정입니다.
+# 두 번째 문자열은 설정 파일의 이름과 일치해야 합니다.
+# libraries/AP_HAL_ChibiOS/hwdef/script 디렉터리의 구성 파일 이름과 일치해야 합니다. 이 경우 다음과 같습니다.
+# F427 MCU를 사용하므로, # STM32F427xx를 선택하여 스크립트 디렉토리에 있는 STM32F427xx.py 파일을 선택합니다.
+# 지원하는 경우 아직 파이썬 하드웨어 데이터베이스 파일이 없는 보드 유형을 지원하는 경우 파일을 만들어야 합니다.
+# 스크립트 디렉터리의 스크립트 디렉터리에 STM32 데이터시트를 파싱하여 이를 지원하는 스크립트가 있습니다.
+# 필요한 DMA 및 대체 기능 테이블을 추출합니다.
+
+# MCU 클래스 및 특정 유형
+MCU STM32F4xx STM32F427xx
+
+# 특정 HAL_BOARD_SUBTYPE을 설정하여 # 드라이버에서 사용자 지정 구성이 가능하도록 합니다.
+# 드라이버에 설정합니다. 이를 사용하려면 하위 유형을 다음 위치에 추가해야 합니다.
+# AP_HAL/AP_HAL_Boards.h에도 추가해야 합니다.
+define CONFIG_HAL_BOARD_SUBTYPE HAL_BOARD_SUBTYPE_CHIBIOS_FMUV3
+
+# 이제 APJ_BOARD_ID를 지정해야 합니다. 이것은 부트로더가 GCS 소프트웨어에 제시하여 이 펌웨어가 보드에 보드에 적합한지 알 수 있습니다.
+# 다음을 참조하세요.
+# https://github.com/ArduPilot/Bootloader/blob/master/hw_config.h
+# 현재 보드 ID 목록을 확인하세요. 새 보드 유형을 추가하는 경우 충돌이 발생하지 않도록 해당 저장소에 추가해 주세요.
+# APJ는 “ArduPilot JSON 펌웨어 형식”입니다.
+
+# 펌웨어 로드를 위한 보드 ID
+APJ_BOARD_ID 9
+
+# 이제 어떤 수정 주파수를 가지고 있는지 말해야 합니다.
+# 보드. 모든 클럭은 이에 맞춰 조정됩니다. 일반적인 값은 다음과 같습니다.
+# 24000000 또는 8000000.
+
+# 수정 주파수
+OSCILLATOR_HZ 24000000
+
+# 일부 보드에서는 다양한 PLL 값도 설정해야 합니다. 참조
+# common/mcuconf.h의 기본값을 참조하고 이 파일 뒷부분에 설명된 # 정의 메커니즘을 사용하여
+# 이 파일의 뒷부분에 설명된 정의 메커니즘을 사용하여 # 보드에 적합한 값을 재정의하세요.
+# 보드에 적합한 값을 오버라이드하세요. MCU 데이터시트 또는 지원되는 보드의 예제를 참조하세요.
+# 올바른 값을 찾으려면 ChibiOS에서 지원되는 보드의 예제를 참조하세요.
+
+# 이제 MCU가 작동하는 전압을 정의합니다. 이는 ChibiOS
+# 에서 다양한 내부 드라이버 제한을 설정하는 데 필요합니다. 0.01볼트 단위입니다.
+
+
+# 이것은 ChibiOS가 로우 레벨 드라이버에 사용할 STM32 타이머입니다.
+# 드라이버입니다. 32비트 타이머여야 합니다. 현재 다음 타이머만 지원합니다.
+# 타이머 2, 3, 4, 5 및 21만 지원합니다. 자세한 내용은 ChibiOS의 hal_st_lld.c를 참조하세요.
+
+# ChibiOS 시스템 타이머
+stm32_st_use_timer 5
+
+# 이제 ld.script를 생성하기 위한 플래시 크기(킬로바이트)입니다.
+
+# 플래시 크기
+flash_size_kb 2048
+
+# 이제 printf()에 사용할 UART를 정의합니다. ChibiOS에서는 printf() 를 거의 사용하지 않으므로, 이것은 실제로 매우 초기 시작 디버깅에만 사용됩니다.
+# 드라이버에서.
+
+# stdout용 직렬 포트. 이것은 선택 사항입니다. 생략하면
+# printf() 줄의 # 출력은 ArduPilot 콘솔로 이동합니다.
+# SERIAL_ORDER 목록의 # 첫 번째 UART로 전달됩니다.  하지만 일부 시작 코드
+# USB가 설정되기 전에 실행됩니다. 
+# STDOUT_SERIAL의 # 값은 직렬 장치 이름이며, 핀이 있는 # 직렬 장치용이어야 합니다. 
+# 핀이 이 파일에 정의된 직렬 장치에 대한 것이어야 합니다. 예를 들어, SD7
+# 은 UART7에 대한 값입니다(SD7 == “시리얼 디바이스 7”(ChibiOS)).
+#stdout_serial sd7
+#stdout_baudrate 57600
+
+# 이제 USB가 있는 경우 USB 설정입니다. 이 모든 설정은
+# 옵션이며, 아래 설정이 기본값입니다. 결국 다음과 같이
+# Linux에서 다음과 같이 USB ID가 생성됩니다:
+# /dev/serial/by-id/usb-ArduPilot_fmuv3_3E0031000B51353233343932-if00
+# RTF 비히클용 보드를 제작하는 경우 이를 커스터마이징할 수 있습니다.
+
+# USB 설정
+USB_STRING_MANUFACTOR “ArduPilot”
+
+# 이제 hal.i2c API에서 I2C 버스가 표시되는 순서를 정의합니다.
+# 에 표시되는 순서를 정의합니다. HAL_PX4에서 상속된 역사적인 이유로 인해
+# '외부' I2C 버스는 hal.i2c에서 버스 1이어야 하고, 내부 I2C 버스
+# 는 버스 0이어야 합니다. fmuv3에서 STM32 I2C1은 외부 버스이고
+# I2C2는 내부 버스이므로, 순서를 I2C2
+# 다음에 I2C1이 오는 기존 순서를 달성하려면
+# 드라이버가 기대하는
+
+# I2C 버스의 # 순서
+I2C_ORDER I2C2 I2C1
+
+# 이제 직렬 순서입니다. 이는 SERIALn_ 매개변수 번호에 매핑됩니다.
+# 더 짧은 목록을 사용하는 경우 HAL_Empty::UARTDriver
+# 객체가 이후 UART로 대체되거나, # 다음과 같이 간격을 둘 수 있습니다.
+# 하나 이상의 UART를 EMPTY로 나열하여 간격을 둘 수 있습니다.
+
+# 이 순서의 일반적인 사용법은 다음과 같습니다:
+# 1) SERIAL0: 콘솔(기본 마브링크, 보통 USB)
+# 2) SERIAL1: telem1
+# 3) SERIAL2: telem2
+# 4) SERIAL3: 기본 GPS
+# 5) SERIAL4: GPS2
+# 6) SERIAL5: 추가 UART(보통 RTOS 디버그 콘솔)
+
+# UART(및 USB)의 # 순서
+SERIAL_ORDER OTG1 USART2 USART3 UART4 UART8 UART7
+
+# 보드에 UART를 통해 연결된 IOMCU가 있는 경우, # 이것은 해당 MC와 통신할
+# 해당 MCU와 통신할 # UART를 정의합니다. IOMCU가 없는 보드의 경우 생략하세요.
+
+IOMCU용 # UART
+IOMCU_UART USART6
+
+# 이제 핀 정의부터 시작하겠습니다. ArduPilot에서 사용하는 모든 핀
+# 에서 사용하는 모든 핀이 이 파일에 있어야 합니다. 이 파일의 핀은 어떤 순서로든 정의할 수 있습니다.
+
+# 형식은 P+포트+핀입니다. 따라서 PC4는 포트C 핀4입니다.
+# 모든 핀에 대해 두 번째 열은 레이블입니다. 만약 이것이
+# STM32에 정의된 대체 기능이 있는 주변 장치인 경우
+# 이터시트에 정의된 대체 기능이 있는 # 주변 장치인 경우 레이블은 해당 대체 기능의 이름이어야 합니다.
+# 함수 이름이어야 합니다. 이름은 파이썬 데이터베이스에서 다음과 같이 조회됩니다.
+# MCU. F427 데이터베이스는 STM32F427xx.py를 참조하세요. 해당 데이터베이스
+# 는 대체 함수를 자동으로 채우는 데 사용됩니다(이후 DMA 채널의 경우
+# DMA 채널의 경우).
+
+# 세 번째 열은 주변 장치 유형입니다. 이것은 다음 중 하나이어야 합니다.
+# 다음 중 하나이어야 합니다: UARTn, USARTn, OTGn, SPIn, I2Cn, ADCn, TIMn, SWD, SDIO,
+# 입력, 출력, CS.
+
+# 네 번째 이후 열은 핀의 수정자를 위한 열입니다. 가능한
+# 가능한 수정자는 다음과 같습니다:
+# 핀 속도: 속도_버로우, 속도_낮음, 속도_중간, 속도_높음
+# 풀업: 풀업, 풀다운, 플로팅
+# 아웃 유형: OPENDRain, PUSHPULL
+# 기본값 LOW, HIGH
+
+# 또한 각 핀 주변장치 클래스에는 해당 핀 유형에 적합한 추가 수정자
+# 해당 핀 유형에 적합한 수정자를 추가할 수 있습니다. 예를 들어, OUTPUT의 경우 다음과 같이 매핑할 수 있습니다.
+# GPIO(n) 수정자를 사용하여 hal.gpio의 GPIO 번호에 매핑할 수 있습니다. ADC
+# 입력의 경우 스케일링 계수를 적용하여 단위 볼트로 표시할 수 있습니다.
+# SCALE(x) 수정자를 사용하면 됩니다. 자세한 내용은 아래 예제를 참조하세요.
+# 수정자를 참조하거나 chibios_hwdef.py에서 파이썬 코드를 읽어보세요.
+
+# 이제 GPS용 UART4를 정의합니다. 주의하세요.
+# USART와 UART의 # 차이점에 유의하세요. 어떤 것인지 확실하지 않은 경우 STM32F427xx.py
+# 를 확인하세요. UART의 경우 최소한 TX 및
+# RX 핀을 지정해야 합니다.
+
+# UART4 직렬 GPS
+PA0 UART4_TX UART4
+PA1 UART4_RX UART4
+
+# 이제 기본 배터리 커넥터를 정의합니다. 여기서 선택한 레이블
+# 다양한 드라이버의 핀에 대한 정의를 생성하는 데 사용됩니다.
+# 가능한 경우 기존 보드 설정과 일치하는 이름을 선택하세요. 여기
+# 전압 및 전류 감지를 위한 두 개의 핀 PA2 및 PA3을 정의하고, # 스케일 계수는
+# 1.0의 스케일 팩터로 ADC1에 연결합니다. 이 핀 번호는
+# hal.adc에 매핑되는 핀 번호는 데이터시트를 사용하여 자동으로 결정됩니다.
+# STM32F427xx.py의 # 표를 사용하여 자동으로 결정됩니다.
+
+PA2 BATT_VOLTAGE_SENS ADC1 SCALE(1)
+PA3 BATT_CURRENT_SENS ADC1 SCALE(1)
+
+# 이제 VDD 감지 핀입니다. 1차측 보드 전압을 감지하는 데 사용됩니다.
+PA4 VDD_5V_SENS ADC1 SCALE(2)
+
+# 이제 첫 번째 SPI 버스입니다. 최소한 SCK, MISO 및 MOSI 핀이 필요합니다.
+# 정의가 필요합니다. 원하는 경우 속도 수정자를 추가할 수 있습니다.
+# 그렇지 않으면 주변 장치 클래스의 기본값이 사용됩니다.
+
+PA5 SPI1_SOCK SPI1
+PA6 SPI1_MISO SPI1
+PA7 SPI1_MOSI SPI1
+
+# 기본적으로 LOW 출력으로 설정되는 출력 핀을 정의합니다. 이 핀은 이 보드의
+# 이 보드에서 주변 장치 전원을 활성화하는 핀입니다.
+
+PA8 nVDD_5V_PERIPH_EN OUTPUT LOW
+
+# USB가 연결되었음을 감지하는 핀입니다. 입력 핀입니다.
+# OPENDRAIN으로 설정합니다.
+PA9 VBUS INPUT OPENDRAIN
+
+# 디버그 UART와 통신하기 위한 주석 처리된 핀입니다.
+# 아직 사용되지는 않지만 주석으로 남겨둔 핀입니다(앞에 '#' 표시).
+# 향후 참조를 위해
+# PA10 IO-debug-console
+
+# 이제 USB가 연결되는 핀을 정의합니다.
+PA11 OTG_FS_DM OTG1
+PA12 OTG_FS_DP OTG1
+
+# STlinkv2 또는 블랙매직 프로브를 사용한 SWD 디버깅을 위한 핀입니다.
+PA13 JTMS-SWDIO SWD
+PA14 JTK-SWCLK SWD
+
+# 버저(있는 경우)의 PWM 핀을 정의합니다. 이는
+# GPIO 출력에도 매핑되어 있으므로 다음을 통해 버저를 재생할 수 있습니다.
+# 원하는 경우 MAVLink 릴레이 명령을 통해 버저를 사용할 수 있습니다.
+
+# 버저용 PWM 출력
+PA15 TIM2_CH1 TIM2 GPIO(77) ALARM
+
+# GPIO에 매핑된 몇 가지 범용 출력을 정의합니다.
+# 1번과 2번에 매핑된 두 개의 범용 출력을 정의합니다.
+PB0 EXTERNAL_GPIO1 OUTPUT GPIO(1)
+PB1 EXTERN_GPIO2 OUTPUT GPIO(2)
+
+# 현재 사용되지 않는 일부 입력 핀을 정의합니다.
+PB2 BOOT1 INPUT
+PB3 FMU_SW0 INPUT
+
+# 사용 가능한 경우 두 번째 CAN 인터페이스의 핀을 정의합니다.
+PB6 CAN2_TX CAN2
+PB12 CAN2_RX CAN2
+
+# 이제 첫 번째 I2C 버스입니다. 핀 속도는 자동으로 설정되지만
+# 올바르게 설정되지만 필요한 경우 여기에서 재정의할 수 있습니다.
+PB8 I2C1_SCL I2C1
+PB9 I2C1_SDA I2C1
+
+# 두 번째 I2C 버스
+PB10 I2C2_SCL I2C2
+PB11 I2C2_SDA I2C2
+
+# 2번째 SPI 버스
+PB13 SPI2_SOCK SPI2
+PB14 SPI2_MISO SPI2
+PB15 SPI2_MOSI SPI2
+
+# 이 입력 핀은 USB에서 전원이 유효한지 감지하는 데 사용됩니다.
+PC0 VBUS_nVALID INPUT PULLUP
+
+# 자력계와 첫 번째 IMU의 CS 핀을 정의합니다. 참고
+# CS 핀은 소프트웨어로 제어되며 특정 # SPI 버스에 연결되지 않습니다.
+# SPI 버스에 연결되지 않습니다.
+PC1 MAG_CS CS
+PC2 MPU_CS CS
+
+# 이것은 더 많은 ADC 입력을 정의합니다.
+PC3 AUX_POWER ADC1 SCALE(1)
+PC4 AUX_ADC2 ADC1 SCALE(1)
+
+# 그리고 풍속을 위한 아날로그 입력(요즘은 거의 사용되지 않음).
+PC5 PRESSURE_SENS ADC1 SCALE(2)
+
+# 이렇게 하면 IOMCU와 통신하기 위한 UART가 설정됩니다. 주의할 점은
+# 이 UART에 DMA를 사용할 수 있어야 합니다. 아래 DMA 설정을 참조하세요.
+# 를 참조하세요.
+
+# USART6에서 IO로
+PC6 USART6_TX USART6
+PC7 USART6_RX USART6
+
+# 이제 microSD 카드의 핀을 설정합니다(사용 가능한 경우).
+PC8 SDIO_D0 SDIO
+PC9 SDIO_D1 SDIO
+PC10 SDIO_D2 SDIO
+PC11 SDIO_D3 SDIO
+PC12 SDIO_CK SDIO
+PD2 SDIO_CMD SDIO
+
+# 더 많은 센서를 위한 더 많은 CS 핀. 모든 CS 핀의 레이블은 다음과 같아야 합니다.
+# 이 파일의 뒷부분에 있는 SPI 장치 표와 일치해야 합니다.
+PC13 GYRO_EXT_CS CS
+PC14 BARO_EXT_CS CS
+PC15 ACCEL_EXT_CS CS
+PD7 BARO_CS CS
+PE4 MPU_EXT_CS CS
+
+# 첫 번째 CAN 버스
+PD0 CAN1_RX CAN1
+PD1 CAN1_TX CAN1
+
+# 또 다른 USART, 이것은 telem1용입니다. 여기에는 RTS와 CTS 라인이 있습니다.
+# USART2 serial2 telem1
+PD3 USART2_CTS USART2
+PD4 USART2_RTS USART2
+PD5 USART2_TX USART2
+PD6 USART2_RX USART2
+
+# 텔레엠2 USART, RTS/CTS도 사용 가능.
+# USART3 serial3 telem2
+PD8 USART3_TX USART3
+PD9 USART3_RX USART3
+PD11 USART3_CTS USART3
+PD12 USART3_RTS USART3
+
+# FRAM(램트론)용 CS 핀입니다. 이것은 다음을 사용하는 것으로 표시되어 있습니다.
+# HAL_PX4 설정과 일치하는 # SPEED_VERYLOW를 사용하는 것으로 표시되어 있습니다.
+PD10 FRAM_CS CS SPEED_VERYLOW
+
+# 이제 몇 가지 PWM 핀을 정의하기 시작합니다. 또한 이러한 핀을 GPIO
+# 값에 매핑하여 사용자가 BRD_PWM_COUNT를 설정하여 기본 MCU에서 얼마나 많은 PWM
+# 출력 중 몇 개를 PWM으로 설정할지, 그리고 몇 개를
+# GPIO로 설정할 수 있습니다. HAL_PX4에 맞추기 위해 PWM 출력의 GPIO에 번호를 매깁니다.
+# 50부터 시작합니다.
+PE14 TIM1_CH4 TIM1 PWM(1) GPIO(50)
+PE13 TIM1_CH3 TIM1 PWM(2) GPIO(51)
+PE11 TIM1_CH2 TIM1 PWM(3) GPIO(52)
+PE9 TIM1_CH1 TIM1 PWM(4) GPIO(53)
+PD13 TIM4_CH2 TIM4 PWM(5) GPIO(54)
+PD14 TIM4_CH3 TIM4 PWM(6) GPIO(55)
+
+# 인벤센스 데이터 준비 핀입니다. 기본 드라이버에서는 사용하지 않습니다.
+# 기본 드라이버에서는 사용하지 않습니다.
+PD15 MPU_DRDY INPUT
+
+# 두 번째 GPS UART
+# UART8 시리얼4 GPS2
+PE0 UART8_RX UART8
+PE1 UART8_TX UART8
+
+# 이제 SPI 버스4를 설정합니다.
+PE2 SPI4_SOCK SPI4
+PE5 SPI4_MISO SPI4
+PE6 SPI4_MOSI SPI4
+
+# 센서 레일을 활성화하는 핀입니다. 센서에 전원을 공급하는 데 사용할 수 있습니다.
+# 전원을 켜는 데 문제가 있는 경우 센서를 복구하기 위해 센서를 순환시키는 데 사용할 수 있습니다.
+# 센서 안정성에 영향을 미치는 타이밍에 문제가 있을 때 사용합니다. 기본적으로 높게 설정합니다.
+PE3 VDD_3V3_SENSORS_EN OUTPUT HIGH
+
+# UART7은 HAL의 uartF에 매핑됩니다(SERIALn_ 파라미터의 serial5).
+PE7 UART7_RX UART7
+PE8 UART7_TX UART7
+
+# GPIO(0)에 매핑하여 LED를 정의합니다. LOW는 LED에 불이 들어옵니다.
+PE12 FMU_LED_AMBER OUTPUT HIGH OPENDRIN GPIO(0)
+
+# 전원 플래그 핀: 사용 가능한 다양한 전원 공급 장치의 상태를 MCU에 알려줍니다.
+# 사용 가능한 다양한 전원 공급 장치의 상태를 알려줍니다. 핀 이름은 AnalogIn.dll에 사용된 # 이름과 정확히 일치해야 합니다.
+# 정확히 일치해야 합니다. 
+PB5 VDD_BRICK_nVALID INPUT PULLUP
+PB7 VDD_BRICK2_nVALID INPUT PULLUP
+PE10 VDD_5V_HIPOWER_nOC INPUT PULLUP
+PE15 VDD_5V_PERIPH_nOC INPUT PULLUP
+
+# 이제 SPI 장치 테이블입니다. 이 테이블은 액세스 가능한 모든 SPI
+# 디바이스 테이블을 생성하여 디바이스 이름(디바이스를 여는 데 사용되는 디바이스
+# 장치를 여는 데 사용되는 드라이버), 그리고 어떤 SPI 버스에서 사용되는지, 어떤
+# 장치 ID(매개변수에서 사용되는 ID를 제어합니다.
+# COMPASS_DEV_ID와 같은), # 장치 목록이 언제 변경되는지 감지할 수 있습니다.
+# 보정 목적으로 재부팅 사이에 변경되는 시기를 감지 할 수 있습니다), 사용할 SPI 모드
+# 장치에 대한 저속 및 고속 설정.
+
+# 실제 보유한 것보다 더 많은 SPI 장치를 정의할 수 있어 # 보드 설정의 유연성과
+# 보드 설정의 유연성을 확보할 수 있으며 드라이버 코드에서 프로브하여
+# 어떤 장치가 응답하는지 확인할 수 있습니다.
+
+# DEVID 값과 장치 이름은 ArduPilot의 PX4 포트와 일치하도록 선택됩니다.
+# 사용자가 가속도 및 나침반을 다시 수행할 필요가 없도록 # ArduPilot의 포트와 일치하도록 선택됩니다.
+# 보정을 다시 할 필요가 없습니다.
+
+SPIDEV ms5611         SPI1 DEVID3  BARO_CS      MODE3 20*MHZ 20*MHZ
+SPIDEV ms5611_ext     SPI4 DEVID2  BARO_EXT_CS  MODE3 20*MHZ 20*MHZ
+SPIDEV mpu6000        SPI1 DEVID4  MPU_CS       MODE3  2*MHZ  8*MHZ
+SPIDEV icm20608-am    SPI1 DEVID2  ACCEL_EXT_CS MODE3  4*MHZ  8*MHZ
+SPIDEV mpu9250        SPI1 DEVID4  MPU_CS       MODE3  4*MHZ  8*MHZ
+SPIDEV mpu9250_ext    SPI4 DEVID1  MPU_EXT_CS   MODE3  4*MHZ  8*MHZ
+SPIDEV icm20948       SPI1 DEVID4  MPU_CS       MODE3  4*MHZ  8*MHZ
+SPIDEV icm20948_ext   SPI4 DEVID1  MPU_EXT_CS   MODE3  4*MHZ  8*MHZ
+SPIDEV hmc5843        SPI1 DEVID5  MAG_CS       MODE3 11*MHZ 11*MHZ
+SPIDEV lsm9ds0_g      SPI1 DEVID1  GYRO_EXT_CS  MODE3 11*MHZ 11*MHZ 
+SPIDEV lsm9ds0_am     SPI1 DEVID2  ACCEL_EXT_CS MODE3 11*MHZ 11*MHZ 
+SPIDEV lsm9ds0_ext_g  SPI4 DEVID4  GYRO_EXT_CS  MODE3 11*MHZ 11*MHZ 
+SPIDEV lsm9ds0_ext_am SPI4 DEVID3  ACCEL_EXT_CS MODE3 11*MHZ 11*MHZ 
+SPIDEV icm20602_ext   SPI4 DEVID4  GYRO_EXT_CS  MODE3  4*MHZ  8*MHZ
+SPIDEV ramtron        SPI2 DEVID10 FRAM_CS      MODE3  8*MHZ  8*MHZ
+SPIDEV external0m0    SPI4 DEVID5  MPU_EXT_CS   MODE0  2*MHZ  2*MHZ
+SPIDEV external0m1    SPI4 DEVID5  MPU_EXT_CS   MODE1  2*MHZ  2*MHZ
+SPIDEV external0m2    SPI4 DEVID5  MPU_EXT_CS   MODE2  2*MHZ  2*MHZ
+SPIDEV external0m3    SPI4 DEVID5  MPU_EXT_CS   MODE3  2*MHZ  2*MHZ
+SPIDEV pixartPC15     SPI4 DEVID13 ACCEL_EXT_CS MODE3  2*MHZ  2*MHZ
+

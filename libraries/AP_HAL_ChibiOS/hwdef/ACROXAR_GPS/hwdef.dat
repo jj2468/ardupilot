@@ -1,0 +1,141 @@
+# hw definition file for processing by chibios_pins.py
+# MCU class and specific type
+
+# MCU class and specific type
+MCU STM32G4xx STM32G474xx
+
+FLASH_RESERVE_START_KB 36
+
+STORAGE_FLASH_PAGE 16
+define HAL_STORAGE_SIZE 800
+
+# board ID for firmware load
+APJ_BOARD_ID 1053
+
+# setup build for a peripheral firmware
+env AP_PERIPH 1
+
+# crystal frequency
+OSCILLATOR_HZ 24000000
+
+define CH_CFG_ST_FREQUENCY 1000000
+
+# assume 512k flash part
+FLASH_SIZE_KB 512
+
+# ensure NRST_MODE is set to "Reset input only". This fixes
+# an issue with resetting the CAN node and firmware update
+define HAL_FLASH_SET_NRST_MODE 0x01
+
+# order of UARTs
+SERIAL_ORDER USART3
+
+# sensor power control
+#PC11 VDD_3V3_SENSORS_EN OUTPUT HIGH
+
+
+# USART3, GPS
+PB10 USART3_TX USART3
+PB11 USART3_RX USART3
+
+# SWD debugging
+PA13 JTMS-SWDIO SWD
+PA14 JTCK-SWCLK SWD
+
+# I2C1 bus (LED Driver)
+PA8 I2C2_SDA I2C2
+PA9 I2C2_SCL I2C2
+
+define HAL_I2C_INTERNAL_MASK 3
+
+# I2C buses
+I2C_ORDER I2C2
+
+# GPS PPS
+PB15 GPS_PPS_IN INPUT
+
+# SPI1 - IMUs
+PB3 SPI3_SCK SPI3
+PB4 SPI3_MISO SPI3
+PB5 SPI3_MOSI SPI3
+PB6 BMI088_G_CS CS
+PB7 BMI088_A_CS CS
+PB8 BMI088_DRDY_G INPUT
+PB9 BMI088_DRDY_A INPUT
+
+SPIDEV bmi088_g 	SPI3 DEVID1  BMI088_G_CS  	MODE3 20*MHZ 20*MHZ
+SPIDEV bmi088_a 	SPI3 DEVID2  BMI088_A_CS  	MODE3 20*MHZ 20*MHZ
+
+# compass bmm150 on can-M8N and can-F9P-v1
+IMU BMI088 SPI:bmi088_a SPI:bmi088_g ROTATION_NONE
+COMPASS BMM150 I2C:0:0x11 false ROTATION_NONE
+BARO BMP581 I2C:0:0x46
+#define HAL_INS_PROBE_LIST HAL_INS_PROBE1
+# PWM output for buzzer
+PB2 TIM5_CH1 TIM5 GPIO(77) LOW ALARM
+
+# safety LED, active low
+PB0 SAFE_LED OUTPUT HIGH
+define SAFE_LED_ON 1
+
+# safety button
+PC13 SAFE_BUTTON INPUT PULLUP
+
+# WS2812 LED
+PB1 TIM3_CH4 TIM3 PWM(1)
+
+define HAL_USE_ADC FALSE
+define STM32_ADC_USE_ADC1 FALSE
+define HAL_DISABLE_ADC_DRIVER TRUE
+
+#define HAL_NO_GPIO_IRQ
+
+define HAL_USE_RTC FALSE
+
+define DMA_RESERVE_SIZE 0
+
+# enable CAN support
+
+PB12 CAN2_RX CAN2
+PB13 CAN2_TX CAN2
+#PB14 GPIO_CAN2_SILENT OUTPUT PUSHPULL SPEED_LOW LOW
+
+define HAL_DEVICE_THREAD_STACK 768
+
+# we setup a small defaults.parm
+define AP_PARAM_MAX_EMBEDDED_PARAM 256
+
+# disable dual GPS and GPS blending to save flash space
+define GPS_MAX_RECEIVERS 1
+define GPS_MAX_INSTANCES 1
+define HAL_COMPASS_MAX_SENSORS 1
+
+DMA_NOSHARE USART3*
+
+# add support for moving baseline yaw
+define GPS_MOVING_BASELINE 1
+
+# GPS+MAG+LEDs
+define HAL_PERIPH_ENABLE_GPS
+define HAL_PERIPH_ENABLE_MAG
+define HAL_PERIPH_ENABLE_BARO
+define HAL_PERIPH_ENABLE_IMU
+
+define GPS_MAX_RATE_MS 200
+
+# GPS on 2nd port
+define HAL_PERIPH_GPS_PORT_DEFAULT 0
+
+# keep ROMFS uncompressed as we don't have enough RAM
+# to uncompress the bootloader at runtime
+env ROMFS_UNCOMPRESSED True
+
+# do direct neopixel LED output to enable the 'rainbow' effect on
+# startup
+define HAL_PERIPH_NEOPIXEL_CHAN_WITHOUT_NOTIFY 0
+define HAL_PERIPH_NEOPIXEL_COUNT_WITHOUT_NOTIFY 4
+
+# also enable buzzer
+define HAL_PERIPH_ENABLE_BUZZER_WITHOUT_NOTIFY 1
+
+define DEFAULT_NTF_LED_TYPES 455

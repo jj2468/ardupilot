@@ -52,9 +52,9 @@ static SPIConfig highspeed;
   AP_BoardConfig initialisation. The parameter BRD_SD_SLOWDOWN
   controls a scaling factor on the microSD clock
  */
- static uint8_t sdcard_buf[4096];
+ //static uint8_t sdcard_buf[4096];
 //static struct bouncebuffer_t sdcard_bounce = {sdcard_buf, nullptr, 4096, false, true};
-[[maybe_unused]] static struct bouncebuffer_t sdcard_bounce = {sdcard_buf, nullptr, 4096, false, true};
+//[[maybe_unused]] static struct bouncebuffer_t sdcard_bounce = {sdcard_buf, nullptr, 4096, false, true};
 
 bool sdcard_init()
 {
@@ -74,16 +74,20 @@ bool sdcard_init()
     auto &sdcd = SDCD1;
 #endif
 
-    sdcd.bouncebuffer = &sdcard_bounce;
+    //sdcd.bouncebuffer = &sdcard_bounce;
     
     if (sdcd.bouncebuffer == nullptr) {
         // allocate 4k bouncebuffer for microSD to match size in
-        // AP_Logger
-#if defined(STM32H7)
-        bouncebuffer_init(&sdcd.bouncebuffer, 4096, true);
-#else
+        // AP_Logger - must use AXI SRAM for SDMMC IDMA on STM32H7
+    #if defined(STM32H7)
+        bouncebuffer_init(&sdcd.bouncebuffer, 4096, true);  // true = force AXI SRAM
+        if (sdcd.bouncebuffer->dma_buf == nullptr) {
+            sdcard_running = false;
+            return false;
+        }
+    #else
         bouncebuffer_init(&sdcd.bouncebuffer, 4096, false);
-#endif
+    #endif
     }
 
     if (sdcard_running) {
